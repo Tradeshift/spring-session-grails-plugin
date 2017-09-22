@@ -1,32 +1,41 @@
 package grails.plugin.springsession.store.redis.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import grails.plugin.springsession.config.SpringSessionConfig;
+
 import grails.plugin.springsession.config.SpringSessionConfigProperties;
 import grails.plugin.springsession.converters.GrailsJdkSerializationRedisSerializer;
 import grails.plugin.springsession.utils.ApplicationUtils;
 import grails.plugin.springsession.utils.Objects;
+
 import groovy.util.ConfigObject;
+
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisNode;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.PatternTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.session.data.redis.SessionMessageListener;
 import org.springframework.session.data.redis.config.annotation.web.http.RedisHttpSessionConfiguration;
-import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.JedisShardInfo;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
+
+import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisShardInfo;
 
 /**
  * @author Jitendra Singh
@@ -38,6 +47,9 @@ public class RedisStoreSessionConfig extends RedisHttpSessionConfiguration {
     SpringSessionConfigProperties springSessionConfigProperties;
     GrailsApplication grailsApplication;
     private Logger logger = Logger.getLogger(RedisStoreSessionConfig.class.getName());
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     public RedisStoreSessionConfig(GrailsApplication grailsApplication, ConfigObject config) {
         this.grailsApplication = grailsApplication;
@@ -112,6 +124,23 @@ public class RedisStoreSessionConfig extends RedisHttpSessionConfiguration {
         connectionFactory.setUsePool(redisStoreConfigProperties.getUsePool());
         connectionFactory.afterPropertiesSet();
         return connectionFactory;
+    }
+
+    @Bean
+    @Primary
+    public RedisMessageListenerContainer redisMessageListenerContainer(
+        RedisConnectionFactory connectionFactory) {
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        container.setConnectionFactory(connectionFactory);
+        container.addMessageListener(redisSessionMessageListener(),
+           Arrays.asList(new PatternTopic("__keyevent@*:del"),new PatternTopic("__keyevent@*:expired")));
+        return container;
+    }
+
+    @Bean
+    @Primary
+    public SessionMessageListener redisSessionMessageListener() {
+      return new SessionMessageListener(eventPublisher);
     }
 
     @Bean

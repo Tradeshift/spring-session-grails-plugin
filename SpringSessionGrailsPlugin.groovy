@@ -7,7 +7,7 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.web.filter.DelegatingFilterProxy
 
 class SpringSessionGrailsPlugin {
-    def version = "1.2.1-BUILD_SNAPSHOT"
+    def version = "1.2.3-ts-SNAPSHOT"
     def grailsVersion = "2.4 > *"
     def title = "Spring Session Grails Plugin"
     def author = "Jitendra Singh"
