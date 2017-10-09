@@ -7,7 +7,7 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.web.filter.DelegatingFilterProxy
 
 class SpringSessionGrailsPlugin {
-    def version = "1.2.3-ts-SNAPSHOT"
+    def version = "1.2.3-ts0"
     def grailsVersion = "2.4 > *"
     def title = "Spring Session Grails Plugin"
     def author = "Jitendra Singh"
@@ -17,7 +17,9 @@ class SpringSessionGrailsPlugin {
     def license = "APACHE"
     def issueManagement = [url: "https://github.com/jeetmp3/spring-session/issues"]
     def scm = [url: "https://github.com/jeetmp3/spring-session"]
-    def loadAfter = ['springSecurityCore', 'cors']
+    // Load after controllers
+    def loadAfter = ['springSecurityCore', 'cors', 'controllers']
+    def dependsOn = [controllers:"2.4 > *"]
 
     def getWebXmlFilterOrder() {
         FilterManager filterManager = getClass().getClassLoader().loadClass('grails.plugin.webxml.FilterManager')
@@ -41,10 +43,13 @@ class SpringSessionGrailsPlugin {
             }
         }
 
-//        def filterMapping = xml.'filter-mapping'
-        def filter = xml.'filter'
+        // getWebXmlFilterOrder() doesn't work properly with our setup,
+        // so we inject the mappings after charEncodingFilter
+        def filter = xml.'filter-mapping'.find {
+            it.'filter-name'.text() == "charEncodingFilter"
+        }
 
-        filter[filter.size() - 1] + {
+        filter + {
             'filter-mapping' {
                 'filter-name'('httpSessionSynchronizer')
                 'url-pattern'('/*')
@@ -53,7 +58,7 @@ class SpringSessionGrailsPlugin {
             }
         }
 
-        filter[filter.size() - 1] + {
+        filter + {
             'filter-mapping' {
                 'filter-name'('springSessionRepositoryFilter')
                 'url-pattern'('/*')
