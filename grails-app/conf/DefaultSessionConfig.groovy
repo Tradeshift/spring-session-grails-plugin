@@ -2,8 +2,6 @@ import grails.plugin.springsession.enums.Serializer
 import grails.plugin.springsession.enums.SessionStore
 import grails.plugin.springsession.enums.SessionStrategy
 
-import java.sql.Connection
-
 springsession {
     maxInactiveIntervalInSeconds = 1800
     sessionStore = SessionStore.REDIS

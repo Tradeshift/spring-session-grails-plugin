@@ -26,10 +26,10 @@ class RedisStoreConfigProperties {
         usePool = conf.redis.connectionFactory.usePool ?: false
         hostName = conf.redis.connectionFactory.hostName
         connectionPassword = conf.redis.connectionFactory.password ?: ''
-        port = conf.redis.connectionFactory.port
+        port = conf.redis.connectionFactory.port as Integer
         sentinalPassword = conf.redis.sentinel.password ?: null
-        timeout = conf.redis.sentinel.timeout ?: 5000
-        dbIndex = conf.redis.connectionFactory.dbIndex
+        timeout = conf.redis.sentinel.timeout as Integer ?: 5000
+        dbIndex = conf.redis.connectionFactory.dbIndex as Integer
         convertPipelineAndTxResults = conf.redis.connectionFactory.convertPipelineAndTxResults
         if(conf.redis.jackson.modules && conf.redis.jackson.modules instanceof List)
             jacksonModules = conf.redis.jackson.modules

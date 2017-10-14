@@ -7,7 +7,7 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.web.filter.DelegatingFilterProxy
 
 class SpringSessionGrailsPlugin {
-    def version = "1.2.3-ts0"
+    def version = "1.2.3-ts1"
     def grailsVersion = "2.4 > *"
     def title = "Spring Session Grails Plugin"
     def author = "Jitendra Singh"
@@ -46,7 +46,7 @@ class SpringSessionGrailsPlugin {
         // getWebXmlFilterOrder() doesn't work properly with our setup,
         // so we inject the mappings after charEncodingFilter
         def filter = xml.'filter-mapping'.find {
-            it.'filter-name'.text() == "charEncodingFilter"
+            it.'filter-name'.text() == 'charEncodingFilter'
         }
 
         filter + {
@@ -70,7 +70,7 @@ class SpringSessionGrailsPlugin {
     }
 
     def doWithSpring = {
-        println "\n++++++ Configuring Spring session"
+        println "\nConfiguring Spring Session ..."
         mergeConfig(application)
 
         ConfigObject config = application.config.springsession
@@ -83,7 +83,7 @@ class SpringSessionGrailsPlugin {
 
         sessionStoreConfiguration(RedisStoreSessionConfig, ref("grailsApplication"), config)
 
-        println "++++++ Finished Spring Session configuration"
+        println "... finished configuring Spring Session"
     }
 
     def configureRedis = { ConfigObject conf ->
